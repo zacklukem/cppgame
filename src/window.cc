@@ -4,6 +4,7 @@
 #include "renderer.hh"
 
 #include "gfx.hh"
+#include "chunk.hh"
 
 // TODO: kill me. NOW
 static Window* window_g;
@@ -13,6 +14,23 @@ static void size_callback(GLFWwindow *handle, int width, int height) {
     window_g->width = width;
     window_g->height = height;
     window_g->camera->calculateProjectionMatrix();
+}
+
+static void mouse_callback(GLFWwindow *handle, int button, int action, int mods) {
+  if (button < 0) {
+    return;
+  }
+
+  switch (action) {
+    case GLFW_PRESS:
+      printf("Mouse press\n");
+      window_g->camera->castRay();
+      break;
+    case GLFW_RELEASE:
+      break;
+    default:
+      break;
+  }
 }
 
 Window::Window(int _width, int _height, const char* title)
@@ -50,6 +68,9 @@ Window::Window(int _width, int _height, const char* title)
 
 void Window::start() {
 
+  glfwSetMouseButtonCallback(glfw_window, mouse_callback);
+  glfwSetFramebufferSizeCallback(glfw_window, size_callback);
+
   camera->setWindow(*this);
   camera->calculateProjectionMatrix();
 
@@ -66,7 +87,8 @@ void Window::start() {
     auto start_time = glfwGetTime();
 
     // 54,199,242
-    glClearColor(0.21f, 0.78f, 0.94f, 1.0f);
+    // glClearColor(0.21f, 0.78f, 0.94f, 1.0f);
+    glClearColor(0.9f, 0.9f, 0.9f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     camera->update();

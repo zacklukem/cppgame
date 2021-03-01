@@ -15,6 +15,7 @@ public:
   void calculateProjectionMatrix();
   void update();
   void setWindow(Window& window);
+  void castRay();
   glm::mat4 projection_matrix;
   glm::mat4 view_matrix;
   glm::vec3 position;

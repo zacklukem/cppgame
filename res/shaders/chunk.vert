@@ -15,12 +15,19 @@ layout(location = 2) in uint color;
 uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 model;
+uniform vec3 u_camera;
 
 out float vColor;
 out vec2 uv;
+out float alpha;
+
+#define FALLOFF 0.05f
+#define DISTANCE 50.0f
 
 void main() {
   gl_Position = projection * view * model * vec4(vertexPosition_modelspace,1);
+
+  alpha = clamp(-1.0f * FALLOFF * (distance(u_camera, gl_Position.xyz) - DISTANCE), 0.0f, 1.0f);
 
   uv = uvCoord;
 

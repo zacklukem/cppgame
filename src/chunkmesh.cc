@@ -82,6 +82,7 @@ Block& ChunkMesh::getWorldBlock(Window& window, int x, int y, int z) {
       z < (CHUNK_SIZE - 1)) {
     return chunk.getBlock(x, y, z);
   }
+
   int ax = chunk.x * 16 + x;
   int az = chunk.z * 16 + z;
 
@@ -90,6 +91,7 @@ Block& ChunkMesh::getWorldBlock(Window& window, int x, int y, int z) {
 }
 
 void ChunkMesh::gen(Window& window) {
+  auto start_time = glfwGetTime();
   std::vector<Vertex> vert_vec;
   std::vector<TriIndex> i_vec;
 
@@ -114,6 +116,8 @@ void ChunkMesh::gen(Window& window) {
               if (face == DOWN && y > 0 && chunk.getBlock(x, y-1, z).id)
                 continue;
               if (face == UP && y < (CHUNK_HEIGHT-1) && chunk.getBlock(x, y+1, z).id)
+                continue;
+              if (face == DOWN && y == 0)
                 continue;
             } catch (std::out_of_range& e) {
               printf("Out of range face: %d, %s\n", face, e.what());
@@ -156,6 +160,9 @@ void ChunkMesh::gen(Window& window) {
 
   vertices.write((GLfloat*) vert_vec.data(), 0, sizeof(Vertex) * vert_vec.size());
   indices.write((GLuint*) i_vec.data(), 0, sizeof(TriIndex) * i_vec.size());
+
+  printf("Time to gen: %f\n", glfwGetTime() - start_time);
+
 }
 
 void ChunkMesh::render(Window& window) {
@@ -170,7 +177,6 @@ void ChunkMesh::render(Window& window) {
   indices.bind();
 
   glDrawElements(GL_TRIANGLES, num_elements, GL_UNSIGNED_INT, (void*) 0);
-
 
   glDisableVertexAttribArray(0);
 

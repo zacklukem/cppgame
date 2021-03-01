@@ -9,3 +9,4 @@ int main() {
   window.setRenderer(&renderer);
   window.start();
 }
+
