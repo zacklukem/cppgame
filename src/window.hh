@@ -9,6 +9,7 @@ class Window;
 #include "camera.hh"
 #include "renderer.hh"
 #include "input.hh"
+#include "world.hh"
 
 class Window {
   public:
@@ -25,5 +26,7 @@ class Window {
     Keyboard& keyboard;
     // Maybe be more careful with pointers...
     Renderer* renderer = NULL;
+    World& world;
+    unsigned short selected = 1;
 };
 

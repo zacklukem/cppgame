@@ -30,7 +30,12 @@ static void key_callback(GLFWwindow *handle, int key, int scancode, int action, 
 
   switch (action) {
     case GLFW_PRESS:
+      if (key < GLFW_KEY_9 && key > GLFW_KEY_0) {
+        window_g->selected = key - GLFW_KEY_0;
+
+      }
       window_g->keyboard.keys[key].down = true;
+
       break;
     case GLFW_RELEASE:
       window_g->keyboard.keys[key].down = false;

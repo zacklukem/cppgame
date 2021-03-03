@@ -3,6 +3,17 @@
 #include "window.hh"
 #include <glm/ext.hpp>
 
+struct Vertex {
+  float x, y, z;
+  float ux, uy;
+  std::uint32_t data;
+};
+
+struct TriIndex {
+  GLuint a, b, c;
+};
+
+
 ChunkMesh::ChunkMesh(Chunk& chunk)
   : chunk(chunk),
   vertices(GL_ARRAY_BUFFER, false),
@@ -19,60 +30,6 @@ void ChunkMesh::init() {
 
 }
 
-glm::vec2* getUVCoords(Block& block, GLuint face) {
-  glm::vec2* coords = new glm::vec2[4];
-
-  int bx = 0;
-  int by = 0;
-
-  switch (block.id) {
-    case 1:
-      bx = 0;
-      by = 0;
-      if (face == UP) {
-        bx = 1;
-      } else if (face == DOWN) {
-        bx = 2;
-      }
-      break;
-    case 2:
-      bx = 2;
-      by = 0;
-      break;
-  }
-
-  switch (face) {
-    case NORTH:
-    case SOUTH:
-      coords[0] = glm::vec2(bx + 1, by + 1);
-      coords[1] = glm::vec2(bx + 0, by + 1);
-      coords[2] = glm::vec2(bx + 0, by + 0);
-      coords[3] = glm::vec2(bx + 1, by + 0);
-      break;
-    case EAST:
-    case WEST:
-      coords[0] = glm::vec2(bx + 1, by + 1);
-      coords[1] = glm::vec2(bx + 1, by + 0);
-      coords[2] = glm::vec2(bx + 0, by + 0);
-      coords[3] = glm::vec2(bx + 0, by + 1);
-      break;
-    default:
-      coords[0] = glm::vec2(bx + 0, by + 0);
-      coords[1] = glm::vec2(bx + 1, by + 0);
-      coords[2] = glm::vec2(bx + 1, by + 1);
-      coords[3] = glm::vec2(bx + 0, by + 1);
-      break;
-  }
-
-
-  for (int i = 0; i < 4; i++) {
-    coords[i] /= 32.0f;
-    coords[i].y = 32.0f - coords[i].y;
-  }
-
-  return coords;
-}
-
 Block& ChunkMesh::getWorldBlock(Window& window, int x, int y, int z) {
   if (x > 0 &&
       x < (CHUNK_SIZE - 1) &&
@@ -86,12 +43,11 @@ Block& ChunkMesh::getWorldBlock(Window& window, int x, int y, int z) {
   int ax = chunk.x * 16 + x;
   int az = chunk.z * 16 + z;
 
-  return window.renderer->getAbsoluteBlock(ax, y, az);
+  return window.world.getAbsoluteBlock(ax, y, az);
 
 }
 
 void ChunkMesh::gen(Window& window) {
-  auto start_time = glfwGetTime();
   std::vector<Vertex> vert_vec;
   std::vector<TriIndex> i_vec;
 
@@ -161,14 +117,13 @@ void ChunkMesh::gen(Window& window) {
   vertices.write((GLfloat*) vert_vec.data(), 0, sizeof(Vertex) * vert_vec.size());
   indices.write((GLuint*) i_vec.data(), 0, sizeof(TriIndex) * i_vec.size());
 
-  printf("Time to gen: %f\n", glfwGetTime() - start_time);
 
 }
 
-void ChunkMesh::render(Window& window) {
+void ChunkMesh::render(Window& window, GLint u_model) {
 
   // set model pos uniform
-  glUniformMatrix4fv(window.renderer->u_model, 1, GL_FALSE, &model_matrix[0][0]);
+  glUniformMatrix4fv(u_model, 1, GL_FALSE, &model_matrix[0][0]);
 
   vao.attr(vertices, 0, 3, GL_FLOAT, sizeof(Vertex), 0);
   vao.attr(vertices, 1, 2, GL_FLOAT, sizeof(Vertex), sizeof(float) * 3);

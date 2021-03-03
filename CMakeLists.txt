@@ -17,11 +17,17 @@ add_executable(cppgame
   src/chunk.cc
   src/chunkmesh.cc
   src/image_util.cc
+  src/world.cc
+  src/world_render.cc
+  src/debug_render.cc
+  src/hud_render.cc
+  src/block.cc
 )
 
 target_include_directories(cppgame
   PRIVATE
   src/
+  lib/stb/
 )
 
 # Add glad library

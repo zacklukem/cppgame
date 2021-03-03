@@ -13,7 +13,7 @@
 #define SPEED 8.0f
 
 Camera::Camera() {
-  position = glm::vec3(0.0, 15.0, 0.0f);
+  position = glm::vec3(0.0, 30.0, 0.0f);
   rotation = glm::vec2(0.0, -0.5);
 }
 
@@ -108,7 +108,7 @@ void Camera::update() {
 #define MODULO(x, N) ((x % N + N) % N)
 
 
-void Camera::castRay() {
+void Camera::castRay(int button) {
   glm::vec3 direction = glm::vec3(
     cos(rotation.y) * sin(rotation.x),
     sin(rotation.y),
@@ -129,9 +129,10 @@ void Camera::castRay() {
 
   bool has_intersection = false;
   glm::ivec3 location;
+  glm::ivec3 f_dir;
 
   while (true) {
-    if (window.value().get().renderer->getAbsoluteBlock(p.x, p.y, p.z).id) {
+    if (window.value().get().world.getAbsoluteBlock(p.x, p.y, p.z).id) {
       location = p;
       has_intersection = true;
       break;
@@ -145,6 +146,7 @@ void Camera::castRay() {
 
         p.x += step.x;
         tmax.x += tdelta.x;
+        f_dir = glm::ivec3(-step.x, 0, 0);
         // direction?
       } else {
         if (tmax.z > radius) {
@@ -153,6 +155,7 @@ void Camera::castRay() {
 
         p.z += step.z;
         tmax.z += tdelta.z;
+        f_dir = glm::ivec3(0, 0, -step.z);
         // dir?
       }
     } else {
@@ -163,6 +166,7 @@ void Camera::castRay() {
 
         p.y += step.y;
         tmax.y += tdelta.y;
+        f_dir = glm::ivec3(0, -step.y, 0);
         // dir?
       } else {
         if (tmax.z > radius) {
@@ -170,6 +174,7 @@ void Camera::castRay() {
         }
         p.z += step.z;
         tmax.z += tdelta.z;
+        f_dir = glm::ivec3(0, 0, -step.z);
         //dir?
       }
     }
@@ -179,23 +184,32 @@ void Camera::castRay() {
     printf(" INTERSECTION: %d, %d, %d\n", location.x, location.y, location.z);
     printf("          POS: %d, %d, %d\n", (int) floor(position.x), (int) floor(position.y), (int) floor(position.z));
     printf("       FACING: %d, %d, %d\n", step.x, step.y, step.z);
+    printf("            D: %d, %d, %d\n", f_dir.x, f_dir.y, f_dir.z);
     // printf("        PLANE: %s\n", plane == 0 ? "x" : plane == 1 ? "y" : plane == 2 ? "z" : "u suck");
+
+    if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+      location += f_dir;
+    }
 
     int cx = (int) floor((float) location.x / (float) CHUNK_SIZE);
     int cz = (int) floor((float) location.z / (float) CHUNK_SIZE);
     int bx = (int) MODULO(location.x, CHUNK_SIZE);
     int bz = (int) MODULO(location.z, CHUNK_SIZE);
-    window.value().get().renderer->getAbsoluteBlock(location.x, location.y, location.z) = Block {0x0};
-    window.value().get().renderer->getChunk(cx, cz).get().mesh.value().get().gen(window.value());
+    if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+      window.value().get().world.getAbsoluteBlock(location.x, location.y, location.z) = Block {window.value().get().selected};
+    } else {
+      window.value().get().world.getAbsoluteBlock(location.x, location.y, location.z) = Block {0x0};
+    }
+    window.value().get().world.getChunk(cx, cz).get().mesh.value().get().gen(window.value());
     if (bx == 0) {
-      window.value().get().renderer->getChunk(cx-1, cz).get().mesh.value().get().gen(window.value());
+      window.value().get().world.getChunk(cx-1, cz).get().mesh.value().get().gen(window.value());
     } else if (bx == CHUNK_SIZE - 1) {
-      window.value().get().renderer->getChunk(cx+1, cz).get().mesh.value().get().gen(window.value());
+      window.value().get().world.getChunk(cx+1, cz).get().mesh.value().get().gen(window.value());
     }
     if (bz == 0) {
-      window.value().get().renderer->getChunk(cx, cz-1).get().mesh.value().get().gen(window.value());
+      window.value().get().world.getChunk(cx, cz-1).get().mesh.value().get().gen(window.value());
     } else if (bz == CHUNK_SIZE - 1) {
-      window.value().get().renderer->getChunk(cx, cz+1).get().mesh.value().get().gen(window.value());
+      window.value().get().world.getChunk(cx, cz+1).get().mesh.value().get().gen(window.value());
     }
   } else {
     printf("NO INTERSECTION\n");

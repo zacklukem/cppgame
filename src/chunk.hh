@@ -1,7 +1,6 @@
 #pragma once
 
 class Chunk;
-struct Block;
 
 #define CHUNK_SIZE 16
 #define CHUNK_HEIGHT 256
@@ -11,11 +10,7 @@ struct Block;
 #include <functional>
 
 #include "chunkmesh.hh"
-
-struct Block {
-  std::uint16_t id;
-  // std::uint16_t padding;
-};
+#include "block.hh"
 
 class Chunk {
   public:

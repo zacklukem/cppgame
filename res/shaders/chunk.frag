@@ -9,7 +9,7 @@ uniform sampler2D u_texture;
 
 void main() {
   // color = vColor * vec3(uv, 0.0f);
-  color = vec4(texture(u_texture, uv).rgb * vColor, 1.0f);
-  color.rgb = mix(vec3(0.9f, 0.9f, 0.9f), color.rgb, alpha);
+  color = texture(u_texture, uv);
+  color.rgb = mix(vec3(0.9f, 0.9f, 0.9f), color.rgb * vColor, alpha);
 }
 

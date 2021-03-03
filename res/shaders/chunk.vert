@@ -22,7 +22,7 @@ out vec2 uv;
 out float alpha;
 
 #define FALLOFF 0.05f
-#define DISTANCE 50.0f
+#define DISTANCE 150.0f
 
 void main() {
   gl_Position = projection * view * model * vec4(vertexPosition_modelspace,1);
